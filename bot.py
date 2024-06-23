@@ -31,7 +31,7 @@ async def on_ready():
 @tasks.loop(seconds=60)
 async def weeklyreport():
     now = datetime.datetime.now()
-    if now.weekday() == 4 and now.hour == 16 and now.minute == 0:  # 16:00 UTC Friday
+    if now.weekday() == 6 and now.hour == 17 and now.minute == 0:  # 17:00 UTC Sunday
         with open("points.json","r") as f:
             data = json.load(f)
 
