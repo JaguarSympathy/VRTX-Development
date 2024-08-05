@@ -26,7 +26,7 @@ async def on_ready():
         settings = json.load(f)
     
     global STAFF_ROLE,MAIN_GROUP,SECONDARY_GROUP
-    STAFF_ROLE,MAIN_GROUP,SECONDARY_GROUP = settings["STAFF_ROLE"],settings["MAIN_GROUP"],settings["SECONDARY_GROUP"]
+    STAFF_ROLE,MAIN_GROUP,SECONDARY_GROUP = int(settings["STAFF_ROLE"]),int(settings["MAIN_GROUP"]),int(settings["SECONDARY_GROUP"])
 
 # -- Commands -- #
 @tree.command(name="infractions-add",description="Add infractions to a user [STAFF ONLY]")
@@ -117,7 +117,7 @@ async def report(interaction: discord.Interaction):
 @tree.command(name="settings",description="Edit settings")
 @app_commands.describe(setting="Setting to edit",value="Value to update the setting")
 @app_commands.choices(setting=[app_commands.Choice(name="Staff Role",value="Staff Role"),app_commands.Choice(name="Main Group",value="Main Group"),app_commands.Choice(name="Secondary Group",value="Secondary Group")])
-async def settings(interaction: discord.Interaction, setting: str,value: int):
+async def settings(interaction: discord.Interaction, setting: str,value: str):
     global STAFF_ROLE,MAIN_GROUP,SECONDARY_GROUP
     role = interaction.guild.get_role(STAFF_ROLE)
     if role in interaction.user.roles:
