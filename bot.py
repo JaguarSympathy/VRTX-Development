@@ -30,8 +30,8 @@ async def on_ready():
 
 # -- Commands -- #
 @tree.command(name="infractions-add",description="Add infractions to a user [STAFF ONLY]")
-@app_commands.describe(member="User to add to",points="Number of infractions to add")
-async def add(interaction:discord.Interaction,member:discord.Member,points:int):
+@app_commands.describe(member="User to add to",infractions="Number of infractions to add")
+async def add(interaction:discord.Interaction,member:discord.Member,infractions:int):
     role = interaction.guild.get_role(STAFF_ROLE)
     if role in interaction.user.roles:
         await interaction.response.defer()
@@ -40,9 +40,9 @@ async def add(interaction:discord.Interaction,member:discord.Member,points:int):
             data = json.load(f)
         
         try:
-            data[user] = int(data[user])+points
+            data[user] = int(data[user])+infractions
         except KeyError:
-            data[user] = points
+            data[user] = infractions
 
         with open("points.json","w") as f:
             json.dump(data,f)
@@ -55,8 +55,8 @@ async def add(interaction:discord.Interaction,member:discord.Member,points:int):
 
 
 @tree.command(name="infractions-remove",description="Remove infractions from a user [STAFF ONLY]")
-@app_commands.describe(member="User to remove from",points="Number of infractions to remove")
-async def remove(interaction: discord.Interaction,member: discord.Member,points:int):
+@app_commands.describe(member="User to remove from",infractions="Number of infractions to remove")
+async def remove(interaction: discord.Interaction,member: discord.Member,infractions:int):
     role = interaction.guild.get_role(STAFF_ROLE)
     if role in interaction.user.roles:
         await interaction.response.defer()
@@ -65,10 +65,10 @@ async def remove(interaction: discord.Interaction,member: discord.Member,points:
             data = json.load(f)
         
         try:
-            if int(data[user])-points <= 0:
+            if int(data[user])-infractions <= 0:
                 data[user] = 0
             else:
-                data[user] = int(data[user])-points
+                data[user] = int(data[user])-infractions
         except KeyError:
             data[user] = 0
 
