@@ -114,6 +114,7 @@ async def report(interaction: discord.Interaction):
 @app_commands.describe(setting="Setting to edit",value="Value to update the setting")
 @app_commands.choices(setting=[app_commands.Choice(name="Staff Role",value="Staff Role"),app_commands.Choice(name="Main Group",value="Main Group"),app_commands.Choice(name="Secondary Group",value="Secondary Group")])
 async def settings(interaction: discord.Interaction, setting: str,value: int):
+    global STAFF_ROLE,MAIN_GROUP,SECONDARY_GROUP
     role = interaction.guild.get_role(STAFF_ROLE)
     if role in interaction.user.roles:
         with open("settings.json","r") as f:
