@@ -46,8 +46,10 @@ async def add(interaction:discord.Interaction,member:discord.Member,infractions:
 
         with open("points.json","w") as f:
             json.dump(data,f)
+        
+        member = await client.fetch_user(user)
 
-        embed = discord.Embed(title="Added infractions",description="Successfully added infractions to user.").add_field(name="User",value=user).add_field(name="Added",value=f"{points} infractions").set_footer(text="VRTX Bot | Developed by JaguarSympathy @ Apollo Systems")
+        embed = discord.Embed(title="Added infractions",description="Successfully added infractions to user.").add_field(name="User",value=f"{member.display_name} ({user})").add_field(name="Added",value=f"{infractions} infractions").set_footer(text="VRTX Bot | Developed by JaguarSympathy @ Apollo Systems")
         await interaction.followup.send(embed=embed)
     else:
         embed = discord.Embed(title="Error",colour=discord.Colour.red(),description="You are not authorized to run this command.").set_footer(text="VRTX Bot | Developed by JaguarSympathy @ Apollo Systems")
@@ -75,7 +77,9 @@ async def remove(interaction: discord.Interaction,member: discord.Member,infract
         with open("points.json","w") as f:
             json.dump(data,f)
 
-        embed = discord.Embed(title="Removed infractions",description="Successfully removed infractions from user.").add_field(name="User",value=user).add_field(name="Removed",value=f"{points} registered infractions").set_footer(text="VRTX Bot | Developed by JaguarSympathy @ Apollo Systems")
+        member = await client.fetch_user(user)
+
+        embed = discord.Embed(title="Removed infractions",description="Successfully removed infractions from user.").add_field(name="User",value=f"{member.display_name} ({user})").add_field(name="Removed",value=f"{infractions} infractions").set_footer(text="VRTX Bot | Developed by JaguarSympathy @ Apollo Systems")
         await interaction.followup.send(embed=embed)
     else:
         embed = discord.Embed(title="Error",colour=discord.Colour.red(),description="You are not authorized to run this command.").set_footer(text="VRTX Bot | Developed by JaguarSympathy @ Apollo Systems")
