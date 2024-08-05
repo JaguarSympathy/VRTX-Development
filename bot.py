@@ -112,7 +112,7 @@ async def report(interaction: discord.Interaction):
 
 @tree.command(name="settings",description="Edit settings")
 @app_commands.describe(setting="Setting to edit",value="Value to update the setting")
-@app_commands.choices(setting=[app_commands.Choice("Staff Role"),app_commands.Choice("Main Group"),app_commands.Choice("Secondary Group")])
+@app_commands.choices(setting=[app_commands.Choice(name="Staff Role"),app_commands.Choice(name="Main Group"),app_commands.Choice(name="Secondary Group")])
 async def settings(interaction: discord.Interaction, setting: str,value: int):
     role = interaction.guild.get_role(STAFF_ROLE)
     if role in interaction.user.roles:
