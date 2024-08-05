@@ -114,28 +114,33 @@ async def report(interaction: discord.Interaction):
 @app_commands.describe(setting="Setting to edit",value="Value to update the setting")
 @app_commands.choices(setting=[app_commands.Choice("Staff Role"),app_commands.Choice("Main Group"),app_commands.Choice("Secondary Group")])
 async def settings(interaction: discord.Interaction, setting: str,value: int):
-    with open("settings.json","r") as f:
-        settings = json.load(f)
+    role = interaction.guild.get_role(STAFF_ROLE)
+    if role in interaction.user.roles:
+        with open("settings.json","r") as f:
+            settings = json.load(f)
 
-    embed = discord.Embed(title="Settings Update",description=f"Settings succesfully updated by {interaction.user.display_name}.").set_footer(text="VRTX Bot | Developed by JaguarSympathy @ Apollo Systems")
+        embed = discord.Embed(title="Settings Update",description=f"Settings succesfully updated by {interaction.user.display_name}.").set_footer(text="VRTX Bot | Developed by JaguarSympathy @ Apollo Systems")
 
-    match setting:
-        case "Staff Role":
-            settings["STAFF_ROLE"] = value
-            STAFF_ROLE = value
-            embed.add_field(name="Staff Role Update",value=f"Set `STAFF ROLE` to `{value}`.")
-        case "Main Group":
-            settings["MAIN_GROUP"] = value
-            MAIN_GROUP = value
-            embed.add_field(name="Main Group Update",value=f"Set `MAIN GROUP ID` to `{value}`.")
-        case "Secondary Group":
-            settings["SECONDARY_GROUP"] = value
-            SECONDARY_GROUP = value
-            embed.add_field(name="Secondary Group Update",value=f"Set `SECONDARY GROUP ID` to `{value}`.")
+        match setting:
+            case "Staff Role":
+                settings["STAFF_ROLE"] = value
+                STAFF_ROLE = value
+                embed.add_field(name="Staff Role Update",value=f"Set `STAFF ROLE` to `{value}`.")
+            case "Main Group":
+                settings["MAIN_GROUP"] = value
+                MAIN_GROUP = value
+                embed.add_field(name="Main Group Update",value=f"Set `MAIN GROUP ID` to `{value}`.")
+            case "Secondary Group":
+                settings["SECONDARY_GROUP"] = value
+                SECONDARY_GROUP = value
+                embed.add_field(name="Secondary Group Update",value=f"Set `SECONDARY GROUP ID` to `{value}`.")
 
-    with open("settings.json","w") as f:
-        json.dump(settings,f)
+        with open("settings.json","w") as f:
+            json.dump(settings,f)
 
-    await interaction.response.send_message(embed=embed)
+        await interaction.response.send_message(embed=embed)
+    else:
+        embed = discord.Embed(title="Error",colour=discord.Colour.red(),description="You are not authorized to run this command.").set_footer(text="VRTX Bot | Developed by JaguarSympathy @ Apollo Systems")
+        await interaction.response.send_message(embed=embed)
 
 client.run(TOKEN)
