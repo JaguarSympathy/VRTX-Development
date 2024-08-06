@@ -1,16 +1,17 @@
 import discord
 from discord import app_commands
-from discord.ext import tasks
 from dotenv import load_dotenv
 import os
-import datetime
 import json
+import requests
 
 load_dotenv()
 
 # -- CONSTANTS -- #
 TOKEN = os.getenv("DISCORD_CLIENT_TOKEN")
-WEEKLY_REPORT_CHANNEL = 1254797706677977100 
+STAFF_ROLE = 0
+MAIN_GROUP = 0
+SECONDARY_GROUP = 0
 
 # -- Initialisation -- #
 client = discord.Client(intents=discord.Intents.all())
@@ -129,15 +130,15 @@ async def settings(interaction: discord.Interaction, setting: str,value: str):
         match setting:
             case "Staff Role":
                 settings["STAFF_ROLE"] = value
-                STAFF_ROLE = value
+                STAFF_ROLE = int(value)
                 embed.add_field(name="Staff Role Update",value=f"Set `STAFF ROLE` to `{value}`.")
             case "Main Group":
                 settings["MAIN_GROUP"] = value
-                MAIN_GROUP = value
+                MAIN_GROUP = int(value)
                 embed.add_field(name="Main Group Update",value=f"Set `MAIN GROUP ID` to `{value}`.")
             case "Secondary Group":
                 settings["SECONDARY_GROUP"] = value
-                SECONDARY_GROUP = value
+                SECONDARY_GROUP = int(value)
                 embed.add_field(name="Secondary Group Update",value=f"Set `SECONDARY GROUP ID` to `{value}`.")
 
         with open("settings.json","w") as f:
@@ -147,5 +148,18 @@ async def settings(interaction: discord.Interaction, setting: str,value: str):
     else:
         embed = discord.Embed(title="Error",colour=discord.Colour.red(),description="You are not authorized to run this command.").set_footer(text="VRTX Bot | Developed by JaguarSympathy @ Apollo Systems")
         await interaction.response.send_message(embed=embed)
+
+@tree.command(name="check-user",description="Retrieve user information")
+@app_commands.describe(user="User to check")
+async def checkUser(interaction: discord.Interaction, user: discord.Member):
+    response = requests.post("https://users.roblox.com/v1/usernames/users",json={"usernames":[user.display_name]})
+    assert response.status_code == 200
+    userId = response.json()["data"][0]["id"]
+
+    profile = dict(requests.get(f"https://users.roblox.com/v1/users/{userId}").json())
+
+
+    embed = discord.Embed(title="Profile Check",description=f"Profile information for {user.display_name}.")
+    embed.set_author(name=f"{user.display_name} • {profile["name"]} • {userId}")
 
 client.run(TOKEN)
