@@ -3,6 +3,7 @@ from discord import app_commands
 from dotenv import load_dotenv
 import os
 import json
+from dateutil import parser
 import requests
 
 load_dotenv()
@@ -152,14 +153,38 @@ async def settings(interaction: discord.Interaction, setting: str,value: str):
 @tree.command(name="check-user",description="Retrieve user information")
 @app_commands.describe(user="User to check")
 async def checkUser(interaction: discord.Interaction, user: discord.Member):
+    await interaction.response.defer()
+
     response = requests.post("https://users.roblox.com/v1/usernames/users",json={"usernames":[user.display_name]})
     assert response.status_code == 200
     userId = response.json()["data"][0]["id"]
 
     profile = dict(requests.get(f"https://users.roblox.com/v1/users/{userId}").json())
-
+    joindate = parser.parse(profile["created"][0:10]).strftime("%d/%m/%Y")
 
     embed = discord.Embed(title="Profile Check",description=f"Profile information for {user.display_name}.")
-    embed.set_author(name=f"{user.display_name} • {profile["name"]} • {userId}")
+    embed.set_author(name=f"{user.display_name} • {profile["name"]}",icon_url=user.avatar)
+    embed.add_field(name="Username",value=profile["name"])
+    embed.add_field(name="Discord ID",value=user.id)
+    embed.add_field(name="Roblox ID",value=profile["id"])
+    embed.add_field(name="Join date",value=joindate,inline=False)
+
+    response = requests.get(f"https://groups.roblox.com/v2/users/{userId}/groups/roles").json()
+    found = False
+    for group in response["data"]:
+        if group["group"]["id"] == MAIN_GROUP:
+            embed.add_field(name=f"Group Rank",value=f"{group['group']['name']} ({group['group']['id']}): {group['role']['name']} ({group['role']['rank']})")
+            found = True
+            break
+    for group in response["data"]:
+        if group["group"]["id"] == SECONDARY_GROUP:
+            embed.add_field(name=f"Group Rank",value=f"{group['group']['name']} ({group['group']['id']}): {group['role']['name']} ({group['role']['rank']})")
+            found = True
+            break
+    
+    if found == False:
+        embed.add_field(name="Group Rank",value="Guest")
+
+    await interaction.followup.send(embed=embed)
 
 client.run(TOKEN)
