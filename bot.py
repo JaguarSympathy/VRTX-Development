@@ -157,34 +157,48 @@ async def checkUser(interaction: discord.Interaction, user: discord.Member):
 
     response = requests.post("https://users.roblox.com/v1/usernames/users",json={"usernames":[user.display_name]})
     assert response.status_code == 200
-    userId = response.json()["data"][0]["id"]
-
-    profile = dict(requests.get(f"https://users.roblox.com/v1/users/{userId}").json())
-    joindate = parser.parse(profile["created"][0:10]).strftime("%d/%m/%Y")
-
-    embed = discord.Embed(title="Profile Check",description=f"Profile information for {user.display_name}.")
-    embed.set_author(name=f"{user.display_name} • {profile["name"]}",icon_url=user.avatar)
-    embed.add_field(name="Username",value=profile["name"])
-    embed.add_field(name="Discord ID",value=user.id)
-    embed.add_field(name="Roblox ID",value=profile["id"])
-    embed.add_field(name="Join date",value=joindate,inline=False)
-
-    response = requests.get(f"https://groups.roblox.com/v2/users/{userId}/groups/roles").json()
-    found = False
-    for group in response["data"]:
-        if group["group"]["id"] == MAIN_GROUP:
-            embed.add_field(name=f"Group Rank",value=f"{group['group']['name']} ({group['group']['id']}): {group['role']['name']} ({group['role']['rank']})")
-            found = True
-            break
-    for group in response["data"]:
-        if group["group"]["id"] == SECONDARY_GROUP:
-            embed.add_field(name=f"Group Rank",value=f"{group['group']['name']} ({group['group']['id']}): {group['role']['name']} ({group['role']['rank']})")
-            found = True
-            break
     
-    if found == False:
-        embed.add_field(name="Group Rank",value="Guest")
+    if not response.json()["data"]:
+        embed = discord.Embed(title="Error",description="Failed to retrieve user profile.",colour=discord.Colour.red())
+        await interaction.followup.send(embed=embed)
+    else:
+        userId = response.json()["data"][0]["id"]
 
-    await interaction.followup.send(embed=embed)
+        profile = dict(requests.get(f"https://users.roblox.com/v1/users/{userId}").json())
+        joindate = parser.parse(profile["created"][0:10]).strftime("%d/%m/%Y")
+
+        embed = discord.Embed(title="Profile Check",description=f"Profile information for {user.display_name}.").set_footer(text="VRTX Bot | Developed by JaguarSympathy @ Apollo Systems")
+        embed.set_author(name=f"{user.display_name} • {profile["name"]}",icon_url=user.avatar)
+        embed.add_field(name="Username",value=profile["name"])
+        embed.add_field(name="Discord ID",value=user.id)
+        embed.add_field(name="Roblox ID",value=profile["id"])
+        embed.add_field(name="Join date",value=joindate,inline=False)
+
+        response = requests.get(f"https://groups.roblox.com/v2/users/{userId}/groups/roles").json()
+        if response["data"] == []:
+            embed = discord.Embed(title="Error",description="Failed to retrieve group information.",colour=discord.Colour.red())
+        else:
+            await interaction.followup.send(embed=embed)
+            mainFound = False
+            secondaryFound = False
+            for group in response["data"]:
+                if group["group"]["id"] == MAIN_GROUP:
+                    embed.add_field(name=f"Primary Group Rank",value=f"{group['group']['name']} ({group['group']['id']}): {group['role']['name']} ({group['role']['rank']})")
+                    mainFound = True
+                    break
+            if mainFound == False:
+                embed.add_field(name="Primary Group Rank",value="Guest")
+
+            for group in response["data"]:
+                if group["group"]["id"] == SECONDARY_GROUP:
+                    embed.add_field(name=f"Secondary Group Rank",value=f"{group['group']['name']} ({group['group']['id']}): {group['role']['name']} ({group['role']['rank']})")
+                    secondaryFound = True
+                    break
+            if secondaryFound == False:
+                embed.add_field(name="Secondary Group Rank",value="Guest")
+        
+
+
+        await interaction.followup.send(embed=embed)
 
 client.run(TOKEN)
