@@ -178,7 +178,6 @@ async def checkUser(interaction: discord.Interaction, user: discord.Member):
         if response["data"] == []:
             embed = discord.Embed(title="Error",description="Failed to retrieve group information.",colour=discord.Colour.red())
         else:
-            await interaction.followup.send(embed=embed)
             mainFound = False
             secondaryFound = False
             for group in response["data"]:
@@ -196,8 +195,6 @@ async def checkUser(interaction: discord.Interaction, user: discord.Member):
                     break
             if secondaryFound == False:
                 embed.add_field(name="Secondary Group Rank",value="Guest")
-        
-
 
         await interaction.followup.send(embed=embed)
 
